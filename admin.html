@@ -1,0 +1,291 @@
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>پنل مدیریت HSE</title>
+<style>
+#loginGate{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% 0,#153c31 0,#071512 65%);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{width:min(430px,100%);background:#0d211c;border:1px solid #285446;border-radius:22px;padding:28px;box-shadow:0 20px 80px #0008}
+.login-card h1{margin-top:0}.login-card p{color:#9fc0b4}.login-card input{width:100%;background:#071512;border:1px solid #285446;color:#fff;border-radius:10px;padding:13px;font:inherit;letter-spacing:3px}.login-error{color:#ff9b94;min-height:24px;margin-top:8px}.security-note{background:#102b24;border:1px solid #285446;padding:14px;border-radius:12px;color:#b8d2c9}
+*{box-sizing:border-box}body{margin:0;background:#071512;color:#effaf5;font-family:Tahoma,Arial,sans-serif}.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}.side{background:#0a1d18;border-left:1px solid #21453a;padding:22px;position:sticky;top:0;height:100vh}.side h2{margin-top:0}.side button{width:100%;margin:5px 0;padding:12px;border:1px solid #21453a;background:#102b24;color:#dff7ef;border-radius:10px;text-align:right;cursor:pointer}.side button.active,.side button:hover{background:#164334}.main{padding:30px;max-width:1100px;width:100%}.panel{background:#0d211c;border:1px solid #21453a;border-radius:18px;padding:24px;margin-bottom:20px}.row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.field{margin-bottom:14px}.field label{display:block;color:#9fc0b4;margin-bottom:6px}.field input,.field textarea{width:100%;background:#071512;border:1px solid #21453a;color:#fff;border-radius:10px;padding:11px;font:inherit}.field textarea{min-height:100px;resize:vertical}.actions{display:flex;gap:8px;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:11px 16px;cursor:pointer;font:inherit;font-weight:700;background:#42d3a1;color:#062019}.btn.danger{background:#542524;color:#ffd9d6}.btn.secondary{background:#16382f;color:#dff7ef;border:1px solid #285446}.item{border:1px solid #21453a;padding:15px;border-radius:13px;margin:10px 0;background:#0a1916}.item .actions{margin-top:10px}.status{position:fixed;left:18px;bottom:18px;background:#12372d;padding:10px 15px;border-radius:10px;display:none}.small{color:#8eaaa1;font-size:13px}.hidden{display:none}@media(max-width:800px){.app{grid-template-columns:1fr}.side{height:auto;position:relative;border-left:0;border-bottom:1px solid #21453a}.row{grid-template-columns:1fr}.main{padding:18px}}
+</style></head><body><script>
+(function(){
+  try {
+    /* نسخه ورود پایدار: یک بار رمز قدیمی/خراب را پاک می‌کنیم تا رمز اولیه 0000 حتماً کار کند. */
+    if(localStorage.getItem('hsePasswordFixV2')!=='1'){
+      localStorage.removeItem('hseAdminPasswordHash');
+      localStorage.removeItem('hseAdminPassword');
+      sessionStorage.removeItem('hseAdminSession');
+      localStorage.setItem('hseAdminPassword','0000');
+      localStorage.setItem('hsePasswordFixV2','1');
+    }
+  } catch(e) {}
+})();
+</script>
+
+<div id="loginGate">
+  <div class="login-card">
+    <div class="small">پنل خصوصی مدیریت</div>
+    <h1>ورود به پنل HSE</h1>
+    <p>برای ورود، رمز عبور مدیر را وارد کنید.</p>
+    <input id="loginPassword" type="password" inputmode="numeric" autocomplete="current-password" placeholder="رمز عبور">
+    <div id="loginError" class="login-error"></div>
+    <button id="loginBtn" class="btn" style="width:100%">ورود</button>
+    <p class="small">رمز اولیه: 0000 — پس از ورود می‌توانید آن را تغییر دهید.</p>
+  </div>
+</div>
+<div class="app"><aside class="side"><h2>HSE مدیریت</h2><p class="small">مدیریت کامل محتوای سایت</p>
+<button data-tab="general" class="active">اطلاعات اصلی</button><button data-tab="services">خدمات</button><button data-tab="projects">پروژه‌ها</button><button data-tab="details">صفحات توضیحات</button><button data-tab="certificates">گواهینامه‌ها</button><button data-tab="security">🔐 امنیت و اعلان</button><hr><button id="save">💾 ذخیره</button><button id="download">📦 ساخت و دانلود سایت</button><button id="export">⬇️ خروجی اطلاعات</button><button id="importBtn">⬆️ ورود اطلاعات</button><input id="file" type="file" accept=".json" class="hidden"></aside>
+<main class="main"><h1>پنل مدیریت سایت HSE</h1><p class="small">هر تغییری را ذخیره کن؛ سپس با «ساخت و دانلود سایت» نسخه نهایی سایت ساخته می‌شود.</p>
+<section id="general" class="tab panel"><h2>اطلاعات و متن‌های اصلی سایت</h2><div class="row">
+<div class="field"><label>نام</label><input id="owner"></div><div class="field"><label>عنوان سایت</label><input id="title"></div>
+<div class="field"><label>عنوان اصلی صفحه</label><input id="tagline"></div><div class="field"><label>متن معرفی صفحه اصلی</label><textarea id="heroText"></textarea></div>
+<div class="field"><label>تلفن</label><input id="phone"></div><div class="field"><label>ایمیل</label><input id="email"></div><div class="field"><label>موقعیت</label><input id="location"></div></div>
+<div class="field"><label>عنوان بخش درباره من</label><input id="aboutTitle"></div><div class="field"><label>زیرعنوان درباره من</label><textarea id="aboutSubtitle"></textarea></div><div class="field"><label>متن درباره من</label><textarea id="about"></textarea></div><div class="field"><label>رویکرد کاری</label><textarea id="approach"></textarea></div>
+<hr><h3>عنوان و توضیح بخش‌ها</h3><div class="row">
+<div class="field"><label>عنوان خدمات</label><input id="servicesTitle"></div><div class="field"><label>توضیح خدمات</label><textarea id="servicesSubtitle"></textarea></div>
+<div class="field"><label>عنوان پروژه‌ها</label><input id="projectsTitle"></div><div class="field"><label>توضیح پروژه‌ها</label><textarea id="projectsSubtitle"></textarea></div>
+<div class="field"><label>عنوان شرح خدمات</label><input id="detailsTitle"></div><div class="field"><label>توضیح شرح خدمات</label><textarea id="detailsSubtitle"></textarea></div>
+<div class="field"><label>عنوان مدارک</label><input id="certificatesTitle"></div><div class="field"><label>توضیح مدارک</label><textarea id="certificatesSubtitle"></textarea></div>
+<div class="field"><label>عنوان تماس</label><input id="contactTitle"></div><div class="field"><label>توضیح تماس</label><textarea id="contactSubtitle"></textarea></div>
+</div></section>
+
+
+<section id="services" class="tab panel hidden"><h2>خدمات</h2><div id="servicesList"></div><button class="btn" onclick="addItem('services')">+ افزودن خدمت</button></section>
+<section id="projects" class="tab panel hidden"><h2>پروژه‌ها و سوابق</h2><div id="projectsList"></div><button class="btn" onclick="addItem('projects')">+ افزودن پروژه</button></section>
+<section id="details" class="tab panel hidden"><h2>صفحات و توضیحات خدمات</h2><div id="detailsList"></div><button class="btn" onclick="addItem('detail_sections')">+ افزودن توضیح</button></section>
+<section id="certificates" class="tab panel hidden"><h2>گواهینامه‌ها و مدارک</h2><div id="certificatesList"></div><button class="btn" onclick="addItem('certificates')">+ افزودن گواهینامه</button></section>
+<section id="security" class="tab panel hidden">
+  <h2>امنیت و اعلان ورود</h2>
+  <div class="security-note">برای امنیت، رمز جدید فقط به‌صورت هش‌شده در همین مرورگر ذخیره می‌شود و خود رمز در فایل سایت قرار نمی‌گیرد.</div>
+  <div class="row" style="margin-top:18px">
+    <div class="field"><label>رمز فعلی</label><input id="oldPassword" type="password" inputmode="numeric"></div>
+    <div class="field"><label>رمز جدید</label><input id="newPassword" type="password" inputmode="numeric"></div>
+  </div>
+  <div class="field"><label>تکرار رمز جدید</label><input id="newPassword2" type="password" inputmode="numeric"></div>
+  <div class="actions">
+    <button class="btn" id="changePasswordBtn">تغییر رمز</button>
+    <button class="btn secondary" id="enableNotifyBtn">🔔 فعال‌سازی اعلان ورود روی این دستگاه</button>
+    <button class="btn danger" id="logoutBtn">خروج از پنل</button>
+  </div>
+  <p class="small" id="notifyStatus">اعلان ورود برای همین دستگاه/مرورگر قابل فعال‌سازی است. برای اعلام ورود روی گوشی از دستگاه دیگری، سایت باید به یک سرویس اعلان یا سرور متصل شود.</p>
+</section>
+</main></div><div id="status" class="status"></div>
+<script>
+
+const AUTH_KEY='hseAdminPassword';
+const SESSION_KEY='hseAdminSession';
+const NOTIFY_KEY='hseLoginNotify';
+// This panel is a static/local HTML app, so authentication is stored locally on the device.
+// The previous Web Crypto SHA-256 implementation could fail when opening the file directly.
+function ensurePassword(){
+  try {
+    if(!localStorage.getItem(AUTH_KEY)) localStorage.setItem(AUTH_KEY,'0000');
+  } catch(e) {
+    alert('مرورگر اجازه ذخیره اطلاعات پنل را نمی‌دهد. لطفاً فایل را با Chrome یا Edge باز کنید.');
+  }
+}
+function isLoggedIn(){return sessionStorage.getItem(SESSION_KEY)==='1'}
+function openAdmin(){
+  $('loginGate').style.display='none';
+  if(localStorage.getItem(NOTIFY_KEY)==='1' && 'Notification' in window && Notification.permission==='granted'){
+    try{new Notification('ورود به پنل HSE',{body:'ورود به پنل مدیریت با موفقیت انجام شد.'})}catch(e){}
+  }
+}
+function doLogin(){
+  const p=$('loginPassword').value;
+  const good=p===localStorage.getItem(AUTH_KEY);
+  if(good){
+    sessionStorage.setItem(SESSION_KEY,'1');
+    $('loginError').textContent='';
+    openAdmin();
+  }else{
+    $('loginError').textContent='رمز عبور اشتباه است.';
+    $('loginPassword').value='';
+    $('loginPassword').focus();
+  }
+}
+function changePassword(){
+  const oldP=$('oldPassword').value, newP=$('newPassword').value, newP2=$('newPassword2').value;
+  if(!oldP || !newP){alert('رمز فعلی و رمز جدید را وارد کنید.');return}
+  if(newP!==newP2){alert('تکرار رمز جدید با رمز جدید یکسان نیست.');return}
+  if(newP.length<4){alert('رمز جدید باید حداقل ۴ کاراکتر باشد.');return}
+  if(oldP!==localStorage.getItem(AUTH_KEY)){alert('رمز فعلی اشتباه است.');return}
+  localStorage.setItem(AUTH_KEY,newP);
+  $('oldPassword').value=$('newPassword').value=$('newPassword2').value='';
+  toast('رمز عبور با موفقیت تغییر کرد ✓');
+}
+async function enableNotifications(){
+  if(!('Notification' in window)){alert('این مرورگر اعلان وب را پشتیبانی نمی‌کند.');return}
+  const p=await Notification.requestPermission();
+  if(p==='granted'){
+    localStorage.setItem(NOTIFY_KEY,'1');
+    $('notifyStatus').textContent='اعلان ورود روی این دستگاه فعال شد ✓';
+    try{new Notification('اعلان ورود فعال شد',{body:'ورودهای بعدی این پنل روی این دستگاه اطلاع‌رسانی می‌شوند.'})}catch(e){}
+  }else{
+    $('notifyStatus').textContent='اجازه اعلان داده نشد. از تنظیمات مرورگر اجازه Notifications را فعال کنید.';
+  }
+}
+document.addEventListener('DOMContentLoaded', async ()=>{
+  ensurePassword();
+  const loginBtn=document.getElementById('loginBtn');
+  const loginPassword=document.getElementById('loginPassword');
+  const changeBtn=document.getElementById('changePasswordBtn');
+  const notifyBtn=document.getElementById('enableNotifyBtn');
+  const logoutBtn=document.getElementById('logoutBtn');
+  loginBtn.onclick=doLogin;
+  loginPassword.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+  changeBtn.onclick=changePassword;
+  notifyBtn.onclick=enableNotifications;
+  logoutBtn.onclick=()=>{sessionStorage.removeItem(SESSION_KEY);location.reload()};
+  if(isLoggedIn()) openAdmin();
+});
+
+const DEFAULT={
+  "owner":"مهندس علی نعمتی‌نیا",
+  "title":"HSE | ایمنی، بهداشت حرفه‌ای و محیط زیست",
+  "tagline":"راهکارهای حرفه‌ای برای محیط کار ایمن‌تر",
+  "heroText":"ارائه خدمات تخصصی HSE با تمرکز بر شناسایی خطر، ارزیابی و کنترل ریسک، آموزش، بازرسی و بهبود مستمر فرآیندهای ایمنی.",
+  "aboutTitle":"درباره من",
+  "aboutSubtitle":"هدف، تبدیل الزامات HSE به اقدامات عملی، قابل اجرا و قابل پیگیری در محیط واقعی کار است.",
+  "about":"در حوزه HSE، پیشگیری و کنترل ریسک زمانی اثربخش است که شناسایی خطر، آموزش، بازرسی، مستندسازی و پیگیری اقدامات اصلاحی در کنار یکدیگر قرار بگیرند. این رویکرد با هدف ایجاد محیط کاری ایمن‌تر و بهبود مستمر عملکرد HSE دنبال می‌شود.",
+  "approach":"تمرکز بر شناسایی خطرات، ارزیابی و کنترل ریسک، پیشگیری از حوادث، ارتقای فرهنگ ایمنی و ایجاد فرآیندهای قابل پیگیری.",
+  "servicesTitle":"خدمات تخصصی HSE",
+  "servicesSubtitle":"خدمات متناسب با نوع فعالیت، شرایط محیط کار و نیازهای واقعی مجموعه.",
+  "projectsTitle":"پروژه‌ها و نمونه‌کارها",
+  "projectsSubtitle":"نمونه‌ای از فعالیت‌ها و پروژه‌های قابل ارائه در حوزه HSE.",
+  "detailsTitle":"شرح خدمات",
+  "detailsSubtitle":"توضیحات تکمیلی درباره حوزه‌های خدماتی و نحوه همکاری.",
+  "certificatesTitle":"گواهینامه‌ها و مدارک",
+  "certificatesSubtitle":"مدارک و گواهینامه‌های حرفه‌ای قابل نمایش در این بخش هستند.",
+  "contactTitle":"ارتباط با من",
+  "contactSubtitle":"برای دریافت مشاوره یا هماهنگی همکاری، اطلاعات تماس زیر را مشاهده کنید.",
+  "phone":"برای تکمیل توسط مدیر",
+  "email":"برای تکمیل توسط مدیر",
+  "location":"برای تکمیل توسط مدیر",
+  "services":[
+    {"title":"ارزیابی و مدیریت ریسک","desc":"شناسایی خطرات، ارزیابی احتمال و شدت پیامدها و تعیین اقدامات کنترلی متناسب با فعالیت.","detail":"این خدمت با بررسی نظام‌مند فعالیت‌ها، تجهیزات و شرایط محیط کار آغاز می‌شود. خطرات شناسایی و بر اساس احتمال وقوع و شدت پیامدها اولویت‌بندی می‌شوند؛ سپس اقدامات کنترلی متناسب با سطح ریسک پیشنهاد و برای پیگیری آن‌ها برنامه مشخص تدوین می‌شود. هدف، تبدیل ارزیابی ریسک به یک فرآیند عملی و قابل پیگیری است."},
+    {"title":"بازرسی و پایش ایمنی","desc":"بازرسی محیط کار، ثبت عدم انطباق‌ها، اولویت‌بندی موارد و پیگیری اقدامات اصلاحی.","detail":"بازرسی‌های HSE با تمرکز بر شرایط ناایمن، تجهیزات، مسیرهای تردد، الزامات کاری و وضعیت اجرای اقدامات کنترلی انجام می‌شوند. یافته‌ها ثبت، اولویت‌بندی و برای هر مورد اقدام اصلاحی مشخص می‌شود تا وضعیت تا مرحله رفع یا کنترل مناسب پیگیری شود."},
+    {"title":"آموزش HSE","desc":"برگزاری آموزش‌های کاربردی ایمنی، آمادگی اضطراری و فرهنگ‌سازی رفتار ایمن متناسب با محیط کار.","detail":"محتوای آموزشی بر اساس نوع فعالیت، ریسک‌های شغلی و سطح مسئولیت افراد تنظیم می‌شود. موضوعاتی مانند اصول ایمنی، استفاده صحیح از تجهیزات حفاظت فردی، گزارش‌دهی شرایط ناایمن، آمادگی در شرایط اضطراری و تقویت رفتار ایمن می‌توانند در برنامه آموزشی قرار گیرند."},
+    {"title":"مستندسازی HSE","desc":"تنظیم و سامان‌دهی دستورالعمل‌ها، فرم‌ها، چک‌لیست‌ها، گزارش‌ها و مستندات موردنیاز.","detail":"مستندسازی مناسب باعث می‌شود فعالیت‌های HSE ساختارمند، قابل پیگیری و قابل ارزیابی باشند. این خدمت می‌تواند شامل طراحی یا بازنگری دستورالعمل‌ها، فرم‌ها، چک‌لیست‌ها، گزارش‌های بازرسی، سوابق آموزشی و فرآیندهای پیگیری اقدامات اصلاحی باشد."},
+    {"title":"مدیریت حوادث و شبه‌حوادث","desc":"بررسی رخدادها، شناسایی عوامل مؤثر و تعریف اقدامات اصلاحی و پیشگیرانه برای جلوگیری از تکرار.","detail":"ثبت و بررسی حوادث و شبه‌حوادث می‌تواند اطلاعات ارزشمندی برای پیشگیری از تکرار فراهم کند. در این فرآیند، شرح رخداد، عوامل مؤثر، نقص‌های کنترلی و اقدامات اصلاحی و پیشگیرانه بررسی و برای هر اقدام مسئولیت و پیگیری مشخص در نظر گرفته می‌شود."},
+    {"title":"مشاوره و همراهی HSE","desc":"ارائه راهکار متناسب با شرایط واقعی مجموعه و همراهی در استقرار و بهبود فرآیندهای HSE.","detail":"مشاوره HSE بر شرایط واقعی مجموعه، نوع فعالیت، سطح ریسک و امکانات اجرایی تمرکز دارد. هدف، ارائه راهکارهایی است که فقط روی کاغذ باقی نمانند و بتوانند در محیط کار اجرا، پایش و به‌مرور بهبود داده شوند."}
+  ],
+  "projects":[
+    {"title":"استقرار برنامه بازرسی و کنترل ریسک","desc":"طراحی ساختار بازرسی، شناسایی موارد پرریسک و ایجاد روند مشخص برای پیگیری اقدامات اصلاحی.","detail":"در این نمونه پروژه، ساختار بازرسی بر اساس فعالیت‌ها و ریسک‌های محیط کار طراحی می‌شود. پس از شناسایی موارد مهم، اولویت‌های اصلاحی تعیین و روندی برای ثبت، مسئول‌گذاری، پیگیری و ارزیابی اثربخشی اقدامات ایجاد می‌شود."},
+    {"title":"آموزش و ارتقای فرهنگ ایمنی","desc":"طراحی و اجرای محتوای آموزشی متناسب با محیط کار با هدف افزایش آگاهی و تقویت رفتار ایمن.","detail":"این پروژه بر نیازسنجی آموزشی و ارائه محتوای کاربردی برای کارکنان تمرکز دارد. موضوعات آموزش بر اساس ریسک‌های شغلی انتخاب می‌شوند و می‌توان از جلسات کوتاه، آموزش‌های تخصصی و یادآوری‌های مستمر برای تقویت فرهنگ گزارش‌دهی و رفتار ایمن استفاده کرد."},
+    {"title":"بازنگری فرآیندها و مستندات HSE","desc":"سامان‌دهی و بازنگری مستندات، فرم‌ها و فرآیندهای مرتبط با HSE برای استفاده مؤثرتر در محیط کار.","detail":"در این پروژه، مستندات موجود از نظر ساختار، کاربردپذیری و هماهنگی با فرآیندهای واقعی بررسی می‌شوند. هدف، کاهش مستندات غیرضروری، ساده‌سازی فرم‌ها و ایجاد مجموعه‌ای منظم از اسناد و سوابق مورد استفاده در سیستم HSE است."}
+  ],
+  "certificates":[
+    {"title":"HSE Management","desc":"مدیریت ایمنی، بهداشت حرفه‌ای و محیط زیست"},
+    {"title":"Risk Assessment","desc":"ارزیابی و مدیریت ریسک"},
+    {"title":"Occupational Safety","desc":"ایمنی و بهداشت حرفه‌ای"}
+  ],
+  "detail_sections":[
+    {"title":"ارزیابی و مدیریت ریسک","text":"شناسایی خطرات محیط کار، بررسی احتمال و شدت پیامدها و تعیین اقدامات کنترلی برای کاهش ریسک."},
+    {"title":"بازرسی و پایش ایمنی","text":"بازدید و بررسی وضعیت ایمنی، ثبت عدم انطباق‌ها و ارائه پیشنهاد اصلاحی برای رفع موارد مشاهده‌شده."},
+    {"title":"آموزش و فرهنگ HSE","text":"آموزش موضوعات مرتبط با ایمنی، بهداشت حرفه‌ای و محیط زیست متناسب با نوع فعالیت مجموعه."},
+    {"title":"مستندسازی و دستورالعمل‌ها","text":"تنظیم و سامان‌دهی مستندات موردنیاز سیستم HSE برای استفاده در محیط کاری و کنترل بهتر فرآیندها."},
+    {"title":"مدیریت حوادث و شبه‌حوادث","text":"بررسی و مستندسازی رخدادها با تمرکز بر شناسایی عوامل مؤثر و تعریف اقدامات پیشگیرانه."},
+    {"title":"مشاوره و همراهی HSE","text":"ارائه راهکار متناسب با شرایط واقعی مجموعه و همراهی در مسیر استقرار و بهبود فرآیندهای HSE."}
+  ]
+};
+function makeHseImage(title,icon,sub='HSE'){
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b2a20"/><stop offset="1" stop-color="#123f30"/></linearGradient><pattern id="p" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M0 48L48 0M-12 48L48 -12M0 60L60 0" stroke="#42d3a1" stroke-opacity=".07" stroke-width="2"/></pattern></defs><rect width="1200" height="650" fill="url(#g)"/><rect width="1200" height="650" fill="url(#p)"/><circle cx="1010" cy="110" r="170" fill="#42d3a1" fill-opacity=".08"/><circle cx="180" cy="540" r="230" fill="#9aefd0" fill-opacity=".05"/><g fill="none" stroke="#42d3a1" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M600 115l180 65v135c0 125-80 205-180 250-100-45-180-125-180-250V180z"/><path d="M510 305h180M600 215v180"/></g><text x="600" y="500" fill="#f1faf6" font-family="Tahoma,Arial,sans-serif" font-size="48" font-weight="700" text-anchor="middle">${title}</text><text x="600" y="555" fill="#9aefd0" font-family="Tahoma,Arial,sans-serif" font-size="26" text-anchor="middle">${sub}</text><text x="600" y="110" fill="#42d3a1" font-family="Arial,sans-serif" font-size="74" font-weight="700" text-anchor="middle">${icon}</text></svg>`;
+ return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
+}
+const defaultImages=[
+ makeHseImage('مدیریت ریسک','⚠','RISK MANAGEMENT'),
+ makeHseImage('بازرسی ایمنی','🛡','SAFETY INSPECTION'),
+ makeHseImage('آموزش HSE','🎓','HSE TRAINING'),
+ makeHseImage('مستندسازی HSE','▤','HSE DOCUMENTATION'),
+ makeHseImage('مدیریت حوادث','!','INCIDENT MANAGEMENT'),
+ makeHseImage('مشاوره HSE','+','HSE CONSULTING')
+];
+const defaultProjectImages=[
+ makeHseImage('کنترل ریسک','✓','HSE PROJECT'),
+ makeHseImage('فرهنگ ایمنی','◎','SAFETY CULTURE'),
+ makeHseImage('مستندات HSE','▦','HSE SYSTEM')
+];
+DEFAULT.services.forEach((x,i)=>{if(!x.image)x.image=defaultImages[i%defaultImages.length];});
+DEFAULT.projects.forEach((x,i)=>{if(!x.image)x.image=defaultProjectImages[i%defaultProjectImages.length];});
+DEFAULT.certificates.forEach((x,i)=>{if(!x.image)x.image=makeHseImage(x.title,'✓','CERTIFICATE');});
+let d=Object.assign(structuredClone(DEFAULT),saved||{}); d.services=(saved&&saved.services)||structuredClone(DEFAULT.services); d.projects=(saved&&saved.projects)||structuredClone(DEFAULT.projects); d.certificates=(saved&&saved.certificates)||structuredClone(DEFAULT.certificates); d.detail_sections=(saved&&saved.detail_sections)||structuredClone(DEFAULT.detail_sections); d.services.forEach((x,i)=>{if(!x.image)x.image=defaultImages[i%defaultImages.length]}); d.projects.forEach((x,i)=>{if(!x.image)x.image=defaultProjectImages[i%defaultProjectImages.length]}); d.certificates.forEach((x,i)=>{if(!x.image)x.image=makeHseImage(x.title,'✓','CERTIFICATE')});
+const $=id=>document.getElementById(id);
+function toast(t){$('status').textContent=t;$('status').style.display='block';setTimeout(()=>$('status').style.display='none',1800)}
+function save(){localStorage.setItem('hseData',JSON.stringify(d));toast('تغییرات ذخیره شد ✓')}
+function fill(){['owner','title','tagline','heroText','phone','email','location','aboutTitle','aboutSubtitle','about','approach','servicesTitle','servicesSubtitle','projectsTitle','projectsSubtitle','detailsTitle','detailsSubtitle','certificatesTitle','certificatesSubtitle','contactTitle','contactSubtitle'].forEach(k=>$(k).value=d[k]||'');['services','projects','detail_sections','certificates'].forEach(renderList)}
+function renderList(type){
+ const box=$(type==='detail_sections'?'detailsList':type+'List');box.innerHTML='';
+ d[type].forEach((x,i)=>{let div=document.createElement('div');div.className='item';
+ div.innerHTML=`<div class="field"><label>عنوان</label><input data-k="title" value="${esc(x.title||'')}"></div><div class="row"><div class="field"><label>برچسب / وضعیت</label><input data-k="label" value="${esc(x.label||'')}"></div><div class="field"><label>لینک تصویر (اختیاری)</label><input data-k="image" value="${esc(x.image||'')}" placeholder="https://..."></div></div><div class="field"><label>توضیح کوتاه</label><textarea data-k="desc">${esc(x.desc||x.text||'')}</textarea></div><div class="field"><label>توضیحات مفصل صفحه اختصاصی</label><textarea data-k="detail" style="min-height:180px">${esc(x.detail||x.text||x.desc||'')}</textarea></div><div class="actions"><button class="btn" onclick="updateItem('${type}',${i},this)">حفظ این مورد</button><button class="btn danger" onclick="deleteItem('${type}',${i})">حذف</button></div>`;box.appendChild(div)})
+}
+function esc(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;')}
+function updateItem(type,i,btn){let box=btn.closest('.item');let title=box.querySelector('[data-k=title]').value;let desc=box.querySelector('[data-k=desc]').value;let detail=box.querySelector('[data-k=detail]').value;let label=box.querySelector('[data-k=label]')?.value||'';let image=box.querySelector('[data-k=image]')?.value||'';d[type][i]={title, ...(type==='detail_sections'?{text:desc,detail,label,image}:{desc,detail,label,image})};save()}
+function addItem(type){d[type].push(type==='detail_sections'?{title:'عنوان جدید',text:'توضیحات جدید',detail:'توضیحات مفصل صفحه اختصاصی',label:'موضوع HSE',image:''}:{title:'عنوان جدید',desc:'توضیحات کوتاه جدید',detail:'توضیحات مفصل صفحه اختصاصی',label:type==='projects'?'نمونه فعالیت':'خدمت تخصصی',image:''});renderList(type);save()}
+function deleteItem(type,i){if(confirm('این مورد حذف شود؟')){d[type].splice(i,1);renderList(type);save()}}
+['owner','title','tagline','heroText','phone','email','location','aboutTitle','aboutSubtitle','about','approach','servicesTitle','servicesSubtitle','projectsTitle','projectsSubtitle','detailsTitle','detailsSubtitle','certificatesTitle','certificatesSubtitle','contactTitle','contactSubtitle'].forEach(k=>$(k).addEventListener('input',()=>{d[k]=$(k).value}))
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.add('hidden'));$(b.dataset.tab).classList.remove('hidden');document.querySelectorAll('[data-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active')})
+$('save').onclick=save;
+$('export').onclick=()=>{save();downloadFile('hse-content.json',JSON.stringify(d,null,2),'application/json')};
+$('download').onclick=async()=>{
+  save();
+  const files=buildAllSiteFiles(d);
+  for(const [name,content] of Object.entries(files)){ downloadFile(name,content,'text/html;charset=utf-8'); await new Promise(r=>setTimeout(r,180)); }
+  toast('نسخه کامل سایت ساخته شد ✓');
+};
+$('importBtn').onclick=()=>$('file').click();
+$('file').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{d=JSON.parse(r.result);save();fill();toast('اطلاعات وارد شد ✓')}catch{alert('فایل اطلاعات معتبر نیست')}};r.readAsText(f)};
+function downloadFile(name,content,type){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+
+function detailPage(item, kind, index, d){
+ const title=esc(item.title||''); const desc=esc(item.desc||''); const detail=esc(item.detail||item.text||item.desc||''); const itemLabel=esc(item.label||(kind==='service'?'خدمت تخصصی HSE':'نمونه فعالیت')); const image=item.image?`<div class="cover"><img src="${esc(item.image)}" alt="${title}"></div>`:'';
+ const back=kind==='service'?'services.html':'projects.html'; const label=kind==='service'?'خدمت تخصصی HSE':'پروژه و نمونه‌کار';
+ return `<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} | ${esc(d.owner)}</title><style>${detailCSS()}</style></head><body><header><div class="wrap"><a class="brand" href="index.html"><span>HSE</span> | ${esc(d.owner)}</a></div></header><main class="wrap"><section class="hero"><div class="eyebrow">${itemLabel}</div><h1>${title}</h1><p class="lead">${desc}</p>${image}</section><article class="card"><h2>توضیحات مفصل</h2><p>${detail}</p><h2>رویکرد و هدف</h2><p>${kind==='service'?'این بخش با توجه به شرایط واقعی مجموعه، نوع فعالیت و سطح ریسک تنظیم می‌شود و هدف آن تبدیل الزامات HSE به اقدامات عملی، قابل پیگیری و قابل ارزیابی است.':'این نمونه پروژه نشان‌دهنده ساختار پیشنهادی برای اجرای فعالیت است و جزئیات آن می‌تواند بر اساس شرایط، اهداف و نیازهای واقعی مجموعه تنظیم شود.'}</p><h2>خروجی مورد انتظار</h2><p>${kind==='service'?'شناسایی نیازها، تعیین اقدامات مناسب، ایجاد روند پیگیری و فراهم‌کردن مبنایی برای بهبود مستمر عملکرد HSE.':'ایجاد یک روند منظم برای اجرا، مستندسازی، پیگیری اقدامات و ارزیابی نتایج با هدف بهبود عملکرد HSE.'}</p><a class="btn" href="${back}">← بازگشت</a></article></main><footer><div class="wrap">© ${esc(d.owner)} — HSE</div></footer></body></html>`;
+}
+function detailCSS(){return `body{margin:0;background:#071512;color:#effaf5;font-family:Tahoma,Arial,sans-serif;line-height:2}.wrap{width:min(1000px,92%);margin:auto}a{color:#42d3a1;text-decoration:none}header{padding:20px 0;border-bottom:1px solid #21453a}.brand{font-weight:900}.brand span{color:#42d3a1}.hero{padding:65px 0 30px}.eyebrow{color:#42d3a1;font-weight:800}.hero h1{font-size:clamp(34px,5vw,58px);line-height:1.3}.lead{font-size:18px;color:#abc2ba}.cover{margin-top:25px;border-radius:24px;overflow:hidden;border:1px solid #21453a;max-height:430px}.cover img{display:block;width:100%;height:100%;max-height:430px;object-fit:cover}.card{background:#0d211c;border:1px solid #21453a;border-radius:22px;padding:30px;margin:20px 0}.card h2{color:#7ce7c4}.card p{color:#abc2ba;white-space:pre-line}.btn{display:inline-block;border:1px solid #42d3a1;padding:10px 16px;border-radius:12px;margin-top:15px}footer{border-top:1px solid #21453a;margin-top:50px;padding:25px 0;color:#abc2ba}`;}
+function buildAllSiteFiles(d){
+ const files={}; files['index.html']=buildSite(d);
+ files['hse-site-final.html']=buildSite(d);
+ files['services.html']=listPage(d,'services'); files['projects.html']=listPage(d,'projects');
+ files['about.html']=aboutPage(d); files['details.html']=detailsPage(d); files['certificates.html']=certificatesPage(d); files['contact.html']=contactPage(d);
+ d.services.forEach((x,i)=>files[`service-${i+1}.html`]=detailPage(x,'service',i,d));
+ d.projects.forEach((x,i)=>files[`project-${i+1}.html`]=detailPage(x,'project',i,d));
+ files['hse-admin-secure.html']=document.documentElement.outerHTML;
+ return files;
+}
+function listPage(d,type){
+ const arr=d[type]||[]; const title=type==='services'?d.servicesTitle:d.projectsTitle; const sub=type==='services'?d.servicesSubtitle:d.projectsSubtitle; const label=type==='services'?'خدمات تخصصی HSE':'نمونه فعالیت‌ها';
+ const cards=arr.length?arr.map((x,i)=>`<article class="card"><div class="number">${i+1}</div><h2>${esc(x.title)}</h2><p>${esc(x.desc||'')}</p><a class="more" href="${type==='services'?'service':'project'}-${i+1}.html">مشاهده جزئیات ←</a></article>`).join(''):'<div class="card"><p>هنوز موردی ثبت نشده است.</p></div>';
+ return pageShell(title,`<div class="eyebrow">${label}</div><h1>${esc(title)}</h1><p class="lead">${esc(sub)}</p>`, `<section><div class="wrap"><div class="grid">${cards}</div></div></section>`,d);
+}
+function pageShell(title,head,body,d){return `<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} | ${esc(d.owner)}</title><style>${listCSS()}</style></head><body><header><div class="wrap nav"><a class="brand" href="index.html"><span>HSE</span> | ${esc(d.owner)}</a><nav><a href="index.html">خانه</a><a href="about.html">درباره من</a><a href="services.html">خدمات</a><a href="projects.html">پروژه‌ها</a><a href="details.html">شرح خدمات</a><a href="certificates.html">مدارک</a><a href="contact.html">تماس</a></nav></div></header><main><section class="page-head"><div class="wrap">${head}</div></section>${body}</main><footer><div class="wrap footer-row"><div>© ${esc(d.owner)} — HSE</div><a href="hse-admin-secure.html" style="color:#42d3a1;font-weight:800">ورود مدیریت</a></div></footer></body></html>`}
+function listCSS(){return `:root{--card:#0d211c;--card2:#102b24;--line:#21453a;--text:#effaf5;--muted:#abc2ba;--accent:#42d3a1;--accent2:#7ce7c4}*{box-sizing:border-box}body{margin:0;background:#071512;color:var(--text);font-family:Tahoma,Arial,sans-serif;line-height:2}a{text-decoration:none;color:inherit}.wrap{width:min(1120px,92%);margin:auto}header{position:sticky;top:0;background:#071512ee;border-bottom:1px solid var(--line);z-index:5}.nav{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-weight:900}.brand span{color:var(--accent)}nav{display:flex;gap:15px;flex-wrap:wrap}nav a{color:var(--muted)}nav a:hover{color:var(--accent)}.page-head{padding:70px 0 35px;border-bottom:1px solid var(--line)}.eyebrow{color:var(--accent);font-weight:800}h1{font-size:clamp(34px,5vw,58px);line-height:1.25;margin:10px 0}.lead{color:var(--muted);font-size:18px;max-width:900px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;padding:45px 0}.card{background:linear-gradient(145deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:22px;padding:27px}.card h2{color:var(--accent2);margin-top:0}.card p{color:var(--muted)}.number{display:inline-flex;width:38px;height:38px;align-items:center;justify-content:center;border-radius:50%;background:#163c30;color:var(--accent);font-weight:900}.more{display:inline-block;margin-top:14px;color:var(--accent);font-weight:800;border-top:1px solid var(--line);padding-top:8px}footer{border-top:1px solid var(--line);padding:30px 0;color:var(--muted)}.footer-row{display:flex;justify-content:space-between}@media(max-width:800px){.nav{align-items:flex-start;flex-direction:column;padding:14px 0}.grid{grid-template-columns:1fr}}`; }
+function aboutPage(d){return pageShell(d.aboutTitle,`<div class="eyebrow">معرفی</div><h1>${esc(d.aboutTitle)}</h1><p class="lead">${esc(d.aboutSubtitle)}</p>`,`<section><div class="wrap"><div class="card"><h2>درباره من</h2><p>${esc(d.about)}</p></div><div class="card"><h2>رویکرد کاری</h2><p>${esc(d.approach)}</p></div></div></section>`,d)}
+function detailsPage(d){const arr=d.detail_sections||[];const cards=arr.map((x,i)=>`<article class="card"><h2>${esc(x.title)}</h2><p>${esc(x.text||x.detail||'')}</p></article>`).join('');return pageShell(d.detailsTitle,`<div class="eyebrow">راهنمای خدمات</div><h1>${esc(d.detailsTitle)}</h1><p class="lead">${esc(d.detailsSubtitle)}</p>`,`<section><div class="wrap"><div class="grid">${cards}</div></div></section>`,d)}
+function certificatesPage(d){const cards=(d.certificates||[]).map(x=>`<article class="card"><h2>${esc(x.title)}</h2><p>${esc(x.desc||'')}</p></article>`).join('');return pageShell(d.certificatesTitle,`<div class="eyebrow">مدارک و گواهی‌ها</div><h1>${esc(d.certificatesTitle)}</h1><p class="lead">${esc(d.certificatesSubtitle)}</p>`,`<section><div class="wrap"><div class="grid">${cards}</div></div></section>`,d)}
+function contactPage(d){return pageShell(d.contactTitle,`<div class="eyebrow">ارتباط</div><h1>${esc(d.contactTitle)}</h1><p class="lead">${esc(d.contactSubtitle)}</p>`,`<section><div class="wrap"><div class="grid"><div class="card"><h2>تلفن</h2><p>${esc(d.phone)}</p></div><div class="card"><h2>ایمیل</h2><p>${esc(d.email)}</p></div><div class="card"><h2>موقعیت</h2><p>${esc(d.location)}</p></div></div></div></section>`,d)}
+function buildSite(d){
+const serviceCards=(d.services||[]).map((x,i)=>`<article class="card feature">${x.image?`<img class="thumb" src="${esc(x.image)}" alt="${esc(x.title)}">`:''}<div class="icon">${['⚠️','🛡️','🎓','📋','🚨','🤝'][i%6]}</div><span class="tag">${esc(x.label||'خدمت تخصصی HSE')}</span><h3>${esc(x.title)}</h3><p>${esc(x.desc||'')}</p><a class="more" href="service-${i+1}.html">مشاهده جزئیات ←</a></article>`).join('');
+const projectCards=(d.projects||[]).map((x,i)=>`<article class="card project">${x.image?`<img class="thumb" src="${esc(x.image)}" alt="${esc(x.title)}">`:''}<div><span class="tag">${esc(x.label||'نمونه فعالیت')}</span><h3>${esc(x.title)}</h3><p>${esc(x.desc||'')}</p></div><a class="more" href="project-${i+1}.html">مشاهده پروژه ←</a></article>`).join('');
+const detailCards=(d.detail_sections||[]).map(x=>`<article class="card"><h3>${esc(x.title)}</h3><p>${esc(x.text||x.detail||'')}</p></article>`).join('');
+const certCards=(d.certificates||[]).map(x=>`<article class="card cert"><div class="cert-icon">✓</div><div><h3>${esc(x.title)}</h3><p>${esc(x.desc||'')}</p></div></article>`).join('');
+let s=`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="${esc(d.heroText)}"><title>__TITLE__ | HSE</title>
+<style>
+:root{--bg:#06110e;--bg2:#0a1c16;--card:#0d211b;--card2:#102b23;--line:#21483a;--text:#f1faf6;--muted:#a9c1b7;--accent:#42d3a1;--accent2:#9aefd0;--gold:#d7c27a}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 85% -5%,#174a3a 0,transparent 34%),linear-gradient(180deg,var(--bg),#081712 55%,#06110e);color:var(--text);font-family:Tahoma,Arial,sans-serif;line-height:1.9}a{text-decoration:none;color:inherit}.wrap{width:min(1160px,92%);margin:auto}.topline{height:3px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}header{position:sticky;top:0;z-index:20;background:#06110eea;backdrop-filter:blur(16px);border-bottom:1px solid #17362c}.nav{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{font-weight:900;font-size:16px}.brand span{color:var(--accent)}nav{display:flex;gap:18px;flex-wrap:wrap}nav a{color:var(--muted);font-size:13px}nav a:hover{color:var(--accent)}.hero{padding:95px 0 75px;position:relative;overflow:hidden}.hero-grid{display:grid;grid-template-columns:1.3fr .7fr;gap:45px;align-items:center}.eyebrow{display:inline-flex;gap:8px;color:var(--accent);font-weight:900;font-size:13px;background:#0a261d;border:1px solid #1e5845;padding:6px 11px;border-radius:99px}.hero h1{font-size:clamp(38px,6vw,70px);line-height:1.2;margin:18px 0 12px;letter-spacing:-1px}.hero p{max-width:780px;color:var(--muted);font-size:18px;margin:0 0 20px}.btn{display:inline-block;padding:12px 21px;border-radius:14px;background:var(--accent);color:#052018;font-weight:900;margin:7px 5px 7px 0;box-shadow:0 12px 35px #42d3a122}.btn.alt{background:transparent;color:var(--accent);border:1px solid #347e65}.hero-card{background:linear-gradient(145deg,#102d24,#081611);border:1px solid #285744;border-radius:28px;padding:28px;box-shadow:0 30px 90px #0008}.shield{width:105px;height:105px;border-radius:30px;display:grid;place-items:center;margin:auto;background:#0a261c;border:1px solid #3c866a;font-size:48px}.hero-card h2{text-align:center;margin:17px 0 5px}.hero-card p{text-align:center;color:var(--muted);margin:0}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}.stat{background:#0a1c16;border:1px solid var(--line);border-radius:17px;padding:17px;text-align:center}.stat strong{display:block;color:var(--accent);font-size:23px}.stat span{color:var(--muted);font-size:11px}.section{padding:72px 0}.section.alt{background:#081813;border-top:1px solid #112d23;border-bottom:1px solid #112d23}.section-head{text-align:center;max-width:780px;margin:0 auto 35px}.kicker{color:var(--accent);font-size:12px;font-weight:900}.section-title{font-size:34px;line-height:1.35;margin:6px 0}.section-sub{color:var(--muted);margin:0}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:linear-gradient(145deg,var(--card),var(--card2));border:1px solid var(--line);border-radius:22px;padding:25px;transition:.2s}.thumb{width:calc(100% + 50px);height:175px;object-fit:cover;margin:-25px -25px 18px;border-radius:22px 22px 0 0;border-bottom:1px solid var(--line)}.card:hover{transform:translateY(-4px);border-color:#3d8066}.card h3{margin:0 0 8px;color:var(--accent2);font-size:18px}.card p{color:var(--muted);margin:0}.icon{font-size:27px;margin-bottom:8px}.more{display:inline-block;margin-top:17px;color:var(--accent);font-weight:900;font-size:13px;border-top:1px solid var(--line);padding-top:9px}.tag{display:inline-block;border:1px solid #356b56;background:#0a261d;color:#91d9bd;padding:3px 9px;border-radius:99px;font-size:10px}.project{min-height:190px;display:flex;flex-direction:column;justify-content:space-between}.about{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}.box{border:1px solid var(--line);border-radius:23px;padding:29px;background:linear-gradient(145deg,#0c2119,#091611)}.box h3{margin-top:0;color:var(--accent2)}.box p{color:var(--muted)}.cert{display:flex;gap:15px;align-items:flex-start}.cert-icon{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;background:#102f25;border:1px solid #39735b;color:var(--accent);font-weight:900}.contact{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.contact .box strong{display:block;color:var(--accent);margin-bottom:5px}.cta{border:1px solid #2a5e4b;border-radius:28px;padding:38px;background:radial-gradient(circle at 80% 0,#123f30,transparent 45%),#0b1d17;text-align:center}.cta h2{margin:0 0 7px;font-size:30px}.cta p{color:var(--muted);max-width:700px;margin:0 auto 15px}footer{border-top:1px solid #17362c;padding:32px 0;color:var(--muted);font-size:13px}.footer-row{display:flex;justify-content:space-between;gap:15px}@media(max-width:850px){nav{display:none}.hero{padding:65px 0 50px}.hero-grid,.about{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.contact{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.hero-card{max-width:430px;margin:auto}.footer-row{flex-direction:column}}
+</style></head><body><div class="topline"></div><header><div class="wrap nav"><a class="brand" href="#top"><span>HSE</span> | __OWNER__</a><nav><a href="#about">درباره من</a><a href="#services">خدمات</a><a href="#projects">پروژه‌ها</a><a href="#details">شرح خدمات</a><a href="#certificates">مدارک</a><a href="#contact">تماس</a></nav></div></header><main id="top">
+<section class="hero"><div class="wrap hero-grid"><div><div class="eyebrow">ایمنی • بهداشت حرفه‌ای • محیط زیست</div><h1>__TAGLINE__</h1><p>__HEROTEXT__</p><a class="btn" href="#services">مشاهده خدمات</a><a class="btn alt" href="#contact">درخواست مشاوره</a></div><aside class="hero-card"><div class="shield">🛡️</div><h2>__OWNER__</h2><p>متخصص و همراه در مسیر بهبود عملکرد HSE</p><div class="stats"><div class="stat"><strong>HSE</strong><span>حوزه تخصصی</span></div><div class="stat"><strong>${(d.services||[]).length}</strong><span>خدمت</span></div><div class="stat"><strong>${(d.projects||[]).length}</strong><span>نمونه فعالیت</span></div><div class="stat"><strong>پیشگیرانه</strong><span>رویکرد کاری</span></div></div></aside></div></section>
+<section class="section" id="about"><div class="wrap"><div class="section-head"><div class="kicker">معرفی</div><h2 class="section-title">__ABOUTTITLE__</h2><p class="section-sub">__ABOUTSUB__</p></div><div class="about"><div class="box"><p>__ABOUT__</p></div><div class="box"><h3>رویکرد کاری</h3><p>__APPROACH__</p></div></div></div></section>
+<section class="section alt" id="services"><div class="wrap"><div class="section-head"><div class="kicker">خدمات تخصصی</div><h2 class="section-title">__SERVICESTITLE__</h2><p class="section-sub">__SERVICESSUB__</p></div><div class="grid">${serviceCards||'<div class="card"><p>هنوز خدمتی ثبت نشده است.</p></div>'}</div></div></section>
+<section class="section" id="projects"><div class="wrap"><div class="section-head"><div class="kicker">نمونه فعالیت‌ها</div><h2 class="section-title">__PROJECTSTITLE__</h2><p class="section-sub">__PROJECTSSUB__</p></div><div class="grid">${projectCards||'<div class="card"><p>هنوز پروژه‌ای ثبت نشده است.</p></div>'}</div></div></section>
+<section class="section alt" id="details"><div class="wrap"><div class="section-head"><div class="kicker">دانش و اجرا</div><h2 class="section-title">__DETAILSTITLE__</h2><p class="section-sub">__DETAILSSUB__</p></div><div class="grid">${detailCards||'<div class="card"><p>محتوایی ثبت نشده است.</p></div>'}</div></div></section>
+<section class="section" id="certificates"><div class="wrap"><div class="section-head"><div class="kicker">سوابق و مدارک</div><h2 class="section-title">__CERTTITLE__</h2><p class="section-sub">__CERTSUB__</p></div><div class="grid">${certCards||'<div class="card"><p>مدرکی ثبت نشده است.</p></div>'}</div></div></section>
+<section class="section alt" id="contact"><div class="wrap"><div class="cta"><div class="kicker">ارتباط</div><h2>__CONTACTTITLE__</h2><p>__CONTACTSUB__</p><div class="contact"><div class="box"><strong>تلفن</strong>__PHONE__</div><div class="box"><strong>ایمیل</strong>__EMAIL__</div><div class="box"><strong>موقعیت</strong>__LOCATION__</div></div></div></div></section>
+</main><footer><div class="wrap footer-row"><div>© __OWNER__ — HSE</div><a href="hse-admin-secure.html" style="color:#42d3a1;font-weight:900">ورود مدیریت</a></div></footer></body></html>`;
+return s.replaceAll('__TITLE__',esc(d.title)).replaceAll('__OWNER__',esc(d.owner)).replaceAll('__TAGLINE__',esc(d.tagline)).replaceAll('__HEROTEXT__',esc(d.heroText)).replaceAll('__ABOUTTITLE__',esc(d.aboutTitle)).replaceAll('__ABOUTSUB__',esc(d.aboutSubtitle)).replaceAll('__ABOUT__',esc(d.about)).replaceAll('__APPROACH__',esc(d.approach)).replaceAll('__SERVICESTITLE__',esc(d.servicesTitle)).replaceAll('__SERVICESSUB__',esc(d.servicesSubtitle)).replaceAll('__PROJECTSTITLE__',esc(d.projectsTitle)).replaceAll('__PROJECTSSUB__',esc(d.projectsSubtitle)).replaceAll('__DETAILSTITLE__',esc(d.detailsTitle)).replaceAll('__DETAILSSUB__',esc(d.detailsSubtitle)).replaceAll('__CERTTITLE__',esc(d.certificatesTitle)).replaceAll('__CERTSUB__',esc(d.certificatesSubtitle)).replaceAll('__CONTACTTITLE__',esc(d.contactTitle)).replaceAll('__CONTACTSUB__',esc(d.contactSubtitle)).replaceAll('__PHONE__',esc(d.phone)).replaceAll('__EMAIL__',esc(d.email)).replaceAll('__LOCATION__',esc(d.location));
+}
+function cards(a){return a.length?a.map(x=>`<article class="card"><h3>${esc(x.title)}</h3><p>${esc(x.desc||x.text||'')}</p></article>`).join(''):'<div class="card"><p>هنوز موردی ثبت نشده است.</p></div>'}
+fill();
+</script>
+<script>
+if(sessionStorage.getItem('hseAdminSession')!=='1'){
+  document.querySelector('.app').style.filter='blur(8px)';
+}
+</script></body></html>
